@@ -28,10 +28,14 @@ func handlePotentialError(err error, variableName string) {
 }
 
 func main() {
-	svc := s3.New(nil)
+	if len(os.Args) != 2 {
+		printAndExit("You must pass in one argument")
+	}
 	variableName := os.Args[1]
 	bucketName := strings.Split(variableName, "/")[0]
 	keyName := strings.Join(strings.Split(variableName, "/")[1:], "/")
+
+	svc := s3.New(nil)
 
 	// make sure bucket exists
 	params := &s3.HeadBucketInput{
