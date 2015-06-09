@@ -6,7 +6,7 @@ if [ -z $VERSION ]; then
     VERSION=$(git describe --abbrev=0 --tags)
 fi
 
-app="summon-aws"
+app="summon-s3"
 
 # Zip and copy to the dist dir
 echo "==> Packaging..."
