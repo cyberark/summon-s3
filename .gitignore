@@ -1,48 +1,8 @@
-Godeps
-summon-aws
-
-test.rb
-test.out
 junit.xml
-*.sublime-*
-cauldron
-keychain
+summon-aws
+*.sublime-project
 secrets.yml
-pkg
-.godeps
 
-# Created by https://www.gitignore.io
-
-### OSX ###
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Icon must end with two \r
-Icon
-
-
-# Thumbnails
-._*
-
-# Files that might appear in the root of a volume
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-
-# Created by https://www.gitignore.io
-
-### Go ###
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
 *.a
@@ -67,4 +27,4 @@ _testmain.go
 *.exe
 *.test
 *.prof
-
+install.sh
