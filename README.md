@@ -1,12 +1,12 @@
 # summon-s3
 
-AWS S3 provider for [Summon](https://conjurinc.github.io/summon).
+AWS S3 provider for [Summon](https://cyberark.github.io/summon).
 
 Provides access to secrets stored in Amazon S3.
 
 ## Usage
 
-[Set summon-s3 as your Summon provider](https://github.com/conjurinc/summon#flags).
+[Set summon-s3 as your Summon provider](https://github.com/cyberark/summon#flags).
 
 Give summon a path to an object in S3 and it will fetch it for you and
 print the value to stdout.

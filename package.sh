@@ -10,8 +10,7 @@ app="summon-s3"
 
 # Zip and copy to the dist dir
 echo "==> Packaging..."
-rm -rf ./pkg/dist
-mkdir -p ./pkg/dist
+rm -rf pkg/dist && mkdir -p ./pkg/dist
 
 for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
     OSARCH=$(basename ${PLATFORM})

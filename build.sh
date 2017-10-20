@@ -1,17 +1,21 @@
 #!/bin/bash
 
-app="summon-s3"
+APP='summon-s3'
+PKGDIR='pkg'
+OSES=(
+  'darwin'
+  'linux'
+  'windows'
+)
+GOARCH='amd64'
 
-rm -rf pkg
+for GOOS in "${OSES[@]}"; do
+  echo "Building $GOOS-$GOARCH binary"
+  echo "-----"
 
-docker build -t summon/build .
-
-projectpath="/goroot/src/github.com/conjurinc/${app}"
-buildcmd='GOX_OS="darwin linux windows" GOX_ARCH="amd64" gox -verbose -output "pkg/{{.OS}}_{{.Arch}}/{{.Dir}}"'
-
-docker run --rm \
--v "$(pwd)":"${projectpath}" \
--w "${projectpath}" \
--e "GOPATH=/goroot/src/github.com/conjurinc/${app}/Godeps/_workspace:$GOPATH" \
-summon/build \
-bash -c "${buildcmd}"
+  docker run --rm \
+    -v "$PWD:/go/src/$APP" -w "/go/src/$APP" \
+    -e "GOOS=$GOOS" -e "GOARCH=$GOARCH" \
+    golang:1.9 \
+      go build -v -o "$PKGDIR/$GOOS/summon-s3"
+done
