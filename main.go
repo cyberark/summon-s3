@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -35,7 +36,16 @@ func main() {
 	bucketName := strings.Split(variableName, "/")[0]
 	keyName := strings.Join(strings.Split(variableName, "/")[1:], "/")
 
-	svc := s3.New(nil)
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	if sess == nil {
+		sess := session.Must(session.NewSession())
+		_ = sess
+	}
+
+	svc := s3.New(sess)
 
 	// make sure bucket exists
 	params := &s3.HeadBucketInput{
