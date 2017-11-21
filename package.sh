@@ -1,32 +1,26 @@
-#!/bin/bash
-set -e
+#!/bin/bash -e
 
-# Get the version from the command line
-if [ -z $VERSION ]; then
-    VERSION=$(git describe --abbrev=0 --tags)
-fi
-
-app="summon-s3"
+APP="summon-s3"
 
 # Zip and copy to the dist dir
 echo "==> Packaging..."
 rm -rf pkg/dist && mkdir -p ./pkg/dist
 
 for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
-    OSARCH=$(basename ${PLATFORM})
+    GOOS=$(basename ${PLATFORM})
 
-    if [ $OSARCH = "dist" ]; then
+    if [ $GOOS = "dist" ]; then
         continue
     fi
 
-    echo "--> ${OSARCH}"
+    echo "--> ${GOOS}"
     pushd $PLATFORM >/dev/null 2>&1
-    zip ../dist/${app}_${VERSION}_${OSARCH}.zip ./*
+    tar -cvzf "../dist/$APP-$GOOS-amd64.tar.gz" ./*
     popd >/dev/null 2>&1
 done
 
 # Make the checksums
 echo "==> Checksumming..."
 pushd ./pkg/dist >/dev/null 2>&1
-shasum -a256 * > ./${app}_${VERSION}_SHA256SUMS
+shasum -a256 * > SHA256SUMS.txt
 popd >/dev/null 2>&1
