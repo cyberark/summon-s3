@@ -12,6 +12,7 @@ pipeline {
     stage('Build') {
       steps {
         sh './build.sh'
+        sh 'sudo chown -R jenkins:jenkins .'  // temporary hack for docker root-owned files
       }
     }
 
