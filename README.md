@@ -24,3 +24,10 @@ printenv MONGOPASS
 
 summon-s3 uses the [official AWS Go SDK](https://github.com/aws/aws-sdk-go). It will use
 the credentials file or environment variables [as they explain](https://github.com/aws/aws-sdk-go#configuring-credentials).
+
+## Contributing
+
+We welcome contributions of all kinds to this repository. For instructions on how to get started and descriptions of our development workflows, please see our [contributing
+guide][contrib].
+
+[contrib]: CONTRIBUTING.md
