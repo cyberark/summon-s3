@@ -22,8 +22,8 @@ printenv MONGOPASS
 
 ## Configuration
 
-summon-s3 uses the [official AWS Go SDK](https://github.com/aws/aws-sdk-go). It will use
-the credentials file or environment variables [as they explain](https://github.com/aws/aws-sdk-go#configuring-credentials).
+summon-s3 uses the [official AWS Go SDK (V2)](https://github.com/aws/aws-sdk-go-v2). It will use
+the credentials file or environment variables [as they explain](https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/#specifying-credentials).
 
 ## Contributing
 

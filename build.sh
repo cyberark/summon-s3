@@ -16,7 +16,7 @@ for GOOS in "${OSES[@]}"; do
   docker run --rm \
     -v "$PWD:/go/src/$APP" -w "/go/src/$APP" \
     -e "GOOS=$GOOS" -e "GOARCH=$GOARCH" \
-    golang:1.9 \
+    golang:1.19 \
       go build -v -o "$PKGDIR/$GOOS/summon-s3"
 done
 
@@ -26,6 +26,6 @@ done
   docker run --rm \
       -v "$PWD:/go/src/$APP" -w "/go/src/$APP" \
       -e "GOOS=linux" -e "GOARCH=$GOARCH" \
-      golang:1.9-alpine \
+      golang:1.19-alpine \
         go build -v -o "$PKGDIR/linux-alpine/summon-s3"
 

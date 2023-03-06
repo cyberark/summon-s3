@@ -1,32 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
-)
 
-func handlePotentialError(err error, variableName string) {
-	if err != nil {
-		if awsErr, ok := err.(awserr.Error); ok {
-			var errMessage string
-			// A service error occurred
-			if reqErr, ok := err.(awserr.RequestFailure); ok {
-				errMessage = fmt.Sprintf("%v %v %v", reqErr.StatusCode(), reqErr.Message(), variableName)
-			} else {
-				errMessage = fmt.Sprintf("%v %v", awsErr.Code(), awsErr.Message())
-			}
-			printAndExit(errMessage)
-		} else {
-			printAndExit(err.Error())
-		}
-	}
-}
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+)
 
 func main() {
 	if len(os.Args) != 2 {
@@ -36,34 +19,33 @@ func main() {
 	bucketName := strings.Split(variableName, "/")[0]
 	keyName := strings.Join(strings.Split(variableName, "/")[1:], "/")
 
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-
-	if sess == nil {
-		sess := session.Must(session.NewSession())
-		_ = sess
+	cfg, err := config.LoadDefaultConfig(context.Background())
+	if err != nil {
+		printAndExit(fmt.Sprintf("%v %v", err.Error(), variableName))
 	}
 
-	svc := s3.New(sess)
+	svc := s3.NewFromConfig(cfg)
 
 	// make sure bucket exists
-	params := &s3.HeadBucketInput{
-		Bucket: aws.String(bucketName),
+	_, err = svc.HeadBucket(context.TODO(), &s3.HeadBucketInput{
+		Bucket: &bucketName,
+	})
+	if err != nil {
+		printAndExit(fmt.Sprintf("%v %v", err.Error(), variableName))
 	}
-	_, err := svc.HeadBucket(params)
-	handlePotentialError(err, variableName)
 
 	getParams := &s3.GetObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(keyName),
+		Bucket: &bucketName,
+		Key:    &keyName,
 	}
 
-	resp, err := svc.GetObject(getParams)
-	handlePotentialError(err, variableName)
+	resp, err := svc.GetObject(context.Background(), getParams)
+	if err != nil {
+		printAndExit(fmt.Sprintf("%v %v", err.Error(), variableName))
+	}
 
 	defer resp.Body.Close()
-	contents, err := ioutil.ReadAll(resp.Body)
+	contents, err := io.ReadAll(resp.Body)
 	if err != nil {
 		printAndExit(err.Error())
 	}
