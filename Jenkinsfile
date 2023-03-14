@@ -28,6 +28,10 @@ pipeline {
       }
     }
 
+    stage('Test') {
+      steps { sh 'summon ./e2e_test.sh' }
+    }
+
     stage('Package') {
       steps {
         sh './package.sh'

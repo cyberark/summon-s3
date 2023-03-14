@@ -2,7 +2,6 @@ pkg
 junit.xml
 summon-aws
 *.sublime-project
-secrets.yml
 
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o

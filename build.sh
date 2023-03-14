@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP='summon-s3'
+APPDIR='/go/src/summon-s3'
 PKGDIR='pkg'
 OSES=(
   'darwin'
@@ -14,18 +14,22 @@ for GOOS in "${OSES[@]}"; do
   echo "-----"
 
   docker run --rm \
-    -v "$PWD:/go/src/$APP" -w "/go/src/$APP" \
+    --entrypoint=/bin/sh \
+    -v "$PWD:$APPDIR" -w "$APPDIR" \
     -e "GOOS=$GOOS" -e "GOARCH=$GOARCH" \
-    golang:1.9 \
-      go build -v -o "$PKGDIR/$GOOS/summon-s3"
+    golang:1.19 -c "
+      git config --global --add safe.directory \"$APPDIR\" && 
+      go build -v -o \"$PKGDIR/$GOOS/summon-s3\""
 done
 
   echo "Building linux-alpine binary"
   echo "-----"
 
   docker run --rm \
-      -v "$PWD:/go/src/$APP" -w "/go/src/$APP" \
+      --entrypoint=/bin/sh \
+      -v "$PWD:$APPDIR" -w "$APPDIR" \
       -e "GOOS=linux" -e "GOARCH=$GOARCH" \
-      golang:1.9-alpine \
-        go build -v -o "$PKGDIR/linux-alpine/summon-s3"
-
+      golang:1.19-alpine -c "
+        apk add --no-cache git &&
+        git config --global --add safe.directory \"$APPDIR\" && 
+        go build -v -o \"$PKGDIR/linux-alpine/summon-s3\""

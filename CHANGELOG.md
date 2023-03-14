@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Security
+- Switch to go modules (remove vendored dependencies), upgrade to aws-sdk-go-v2.  
+  [cyberark/summon-s3#23](https://github.com/cyberark/summon-s3/pull/23)
+
 ## [0.2.0] - 2017-11-22
 ### Added
 - Added alpine linux binary distribution
