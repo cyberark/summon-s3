@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 pipeline {
-  agent { label 'executor-v2' }
+  agent { label 'conjur-enterprise-common-agent' }
 
   options {
     timestamps()
@@ -13,36 +13,47 @@ pipeline {
   }
 
   stages {
+    stage('Get InfraPool Agent') {
+      steps {
+        script {
+          INFRAPOOL_EXECUTORV2_AGENT_0 = getInfraPoolAgent.connected(type: "ExecutorV2", quantity: 1, duration: 1)[0]
+        }
+      }
+    }
+
     stage('Validate') {
       parallel {
         stage('Changelog') {
-          steps { parseChangelog() }
+          steps { parseChangelog(INFRAPOOL_EXECUTORV2_AGENT_0) }
         }
       }
     }
 
     stage('Build') {
       steps {
-        sh './build.sh'
-        sh 'sudo chown -R jenkins:jenkins .'  // temporary hack for docker root-owned files
+        script {
+          INFRAPOOL_EXECUTORV2_AGENT_0.agentSh './build.sh'
+          INFRAPOOL_EXECUTORV2_AGENT_0.agentSh 'sudo chown -R jenkins:jenkins .'  // temporary hack for docker root-owned files
+        }
       }
     }
 
     stage('Test') {
-      steps { sh 'summon ./e2e_test.sh' }
+      steps { script { INFRAPOOL_EXECUTORV2_AGENT_0.agentSh 'summon ./e2e_test.sh' } }
     }
 
     stage('Package') {
       steps {
-        sh './package.sh'
-        archiveArtifacts artifacts: 'pkg/dist/*', fingerprint: true
+        script {
+          INFRAPOOL_EXECUTORV2_AGENT_0.agentSh './package.sh'
+        }
       }
     }
   }
 
   post {
     always {
-      cleanupAndNotify(currentBuild.currentResult)
+      releaseInfraPoolAgent(".infrapool/release_agents")
     }
   }
 }
