@@ -15,6 +15,12 @@ func main() {
 	if len(os.Args) != 2 {
 		printAndExit("You must pass in one argument")
 	}
+
+	if os.Args[1] == "--version" || os.Args[1] == "-v" {
+		fmt.Printf("summon-s3 version %s\n", FullVersionName)
+		os.Exit(0)
+	}
+
 	variableName := os.Args[1]
 	bucketName := strings.Split(variableName, "/")[0]
 	keyName := strings.Join(strings.Split(variableName, "/")[1:], "/")

@@ -1,16 +1,36 @@
-#!/bin/bash
+#!/bin/bash -e
+
+function repo_root() {
+  git rev-parse --show-toplevel
+}
+
+function project_version() {
+  # VERSION derived from CHANGELOG and automated release library
+  echo "$(<"$(repo_root)/VERSION")"
+}
+
+function project_semantic_version() {
+  local version
+  version="$(project_version)"
+
+  # Remove Jenkins build number from VERSION
+  echo "${version/-*/}"
+}
+
+CURRENT_DIR=$(pwd)
+
+echo "Current dir: $CURRENT_DIR"
 
 APPDIR='/go/src/summon-s3'
-PKGDIR='pkg'
-OSES=(
-  'darwin'
-  'linux'
-  'windows'
-)
-GOARCH='amd64'
+MOUNT_DIR="/summon-s3"
+GORELEASER_IMAGE="goreleaser/goreleaser:latest"
 
-for GOOS in "${OSES[@]}"; do
-  echo "Building $GOOS-$GOARCH binary"
+VERSION="$(project_semantic_version)"
+
+# Use GoReleaser for building
+if command -v goreleaser &> /dev/null || [ -n "$GITHUB_TOKEN" ]; then
+  echo "Building with GoReleaser"
+  echo "Version: $VERSION"
   echo "-----"
 
   docker run --rm \
