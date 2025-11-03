@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Update SECURITY.md (CNJR-10980)
 - Switch to go modules (remove vendored dependencies), upgrade to aws-sdk-go-v2.  
   [cyberark/summon-s3#23](https://github.com/cyberark/summon-s3/pull/23)
+- Update Go to 1.25 (CONJSE-2067)
 
 ### Added
 - Added `close-stale.yml` GitHub workflow

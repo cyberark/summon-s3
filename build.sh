@@ -17,7 +17,7 @@ for GOOS in "${OSES[@]}"; do
     --entrypoint=/bin/sh \
     -v "$PWD:$APPDIR" -w "$APPDIR" \
     -e "GOOS=$GOOS" -e "GOARCH=$GOARCH" \
-    golang:1.19 -c "
+    golang:1.25 -c "
       git config --global --add safe.directory \"$APPDIR\" && 
       go build -v -o \"$PKGDIR/$GOOS/summon-s3\""
 done
@@ -29,7 +29,7 @@ done
       --entrypoint=/bin/sh \
       -v "$PWD:$APPDIR" -w "$APPDIR" \
       -e "GOOS=linux" -e "GOARCH=$GOARCH" \
-      golang:1.19-alpine -c "
+      golang:1.25-alpine -c "
         apk add --no-cache git &&
         git config --global --add safe.directory \"$APPDIR\" && 
         go build -v -o \"$PKGDIR/linux-alpine/summon-s3\""
