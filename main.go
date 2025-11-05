@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/cyberark/summon-s3/internal"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 	}
 
 	if os.Args[1] == "--version" || os.Args[1] == "-v" {
-		fmt.Printf("summon-s3 version %s\n", FullVersionName)
+		fmt.Printf("summon-s3 version %s\n", internal.FullVersionName)
 		os.Exit(0)
 	}
 

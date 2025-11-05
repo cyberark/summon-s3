@@ -12,19 +12,8 @@ properties([
 // Performs release promotion.  No other stages will be run
 if (params.MODE == "PROMOTE") {
   release.promote(params.VERSION_TO_PROMOTE) { infrapool, sourceVersion, targetVersion, assetDirectory ->
-    // Any assets from sourceVersion Github release are available in assetDirectory
-    // Any version number updates from sourceVersion to targetVersion occur here
-    // Any publishing of targetVersion artifacts occur here
-    // Anything added to assetDirectory will be attached to the Github Release
-
-    infrapool.agentSh """
-      git checkout "v${sourceVersion}"
-      echo -n "${targetVersion}" > VERSION
-      ./build.sh
-      ./package.sh
-      cp dist/* "${assetDirectory}"
-    """
   }
+  release.copyEnterpriseRelease(params.VERSION_TO_PROMOTE)
   return
 }
 
@@ -38,6 +27,7 @@ pipeline {
 
   triggers {
     cron(getDailyCronString())
+    parameterizedCron(getWeeklyCronString("H(1-5)","%MODE=RELEASE"))
   }
 
   environment {
@@ -95,20 +85,30 @@ pipeline {
     stage('Build') {
       steps {
         script {
-          INFRAPOOL_EXECUTORV2_AGENT_0.agentSh './build.sh'
-          INFRAPOOL_EXECUTORV2_AGENT_0.agentSh 'sudo chown -R jenkins:jenkins .'  // temporary hack for docker root-owned files
+          INFRAPOOL_EXECUTORV2_AGENT_0.agentDir('./pristine-checkout') {
+            // Go releaser requires a pristine checkout
+            checkout scm
+
+            // Copy the checkout content onto infrapool
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentPut from: "./", to: "."
+
+            // Copy VERSION info into prisitine folder
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentSh "cp ../VERSION ./VERSION"
+
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentSh './build.sh'
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentArchiveArtifacts artifacts: 'dist/goreleaser/'
+          }
         }
       }
     }
 
     stage('Test') {
-      steps { script { INFRAPOOL_EXECUTORV2_AGENT_0.agentSh 'summon ./e2e_test.sh' } }
-    }
-
-    stage('Package') {
       steps {
         script {
-          INFRAPOOL_EXECUTORV2_AGENT_0.agentSh './package.sh'
+          // Use the artifacts from the previous stage
+          INFRAPOOL_EXECUTORV2_AGENT_0.agentDir('./pristine-checkout') {
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentSh 'summon ./e2e_test.sh' 
+          }
         }
       }
     }
@@ -125,10 +125,8 @@ pipeline {
             // Publish release artifacts to all the appropriate locations
             // Copy any artifacts to assetDirectory to attach them to the Github release
 
-            INFRAPOOL_EXECUTORV2_AGENT_0.agentSh """
-              # Copy artifacts to GitHub release
-              cp dist/* "${assetDirectory}" || true
-            """
+            // Copy assets to be published in Github release.
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentSh "${toolsDirectory}/bin/copy_goreleaser_artifacts ${assetDirectory}"
 
             // Create Go application SBOM using the go.mod version for the golang container image
             INFRAPOOL_EXECUTORV2_AGENT_0.agentSh """

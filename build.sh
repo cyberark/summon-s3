@@ -28,28 +28,17 @@ GORELEASER_IMAGE="goreleaser/goreleaser:latest"
 VERSION="$(project_semantic_version)"
 
 # Use GoReleaser for building
-if command -v goreleaser &> /dev/null || [ -n "$GITHUB_TOKEN" ]; then
-  echo "Building with GoReleaser"
-  echo "Version: $VERSION"
-  echo "-----"
+docker pull "${GORELEASER_IMAGE}"
+docker run --rm -t \
+  --env GITHUB_TOKEN \
+  --env GOTOOLCHAIN=auto \
+  --env VERSION="${VERSION}" \
+  --entrypoint "/sbin/tini" \
+  -v "$CURRENT_DIR:$MOUNT_DIR" \
+  -w "$MOUNT_DIR" \
+  "${GORELEASER_IMAGE}" \
+  -- sh -c "git config --global --add safe.directory /summon-s3 && \
+    /entrypoint.sh --clean --snapshot && \
+    rm ./dist/goreleaser/artifacts.json"
 
-  docker run --rm \
-    --entrypoint=/bin/sh \
-    -v "$PWD:$APPDIR" -w "$APPDIR" \
-    -e "GOOS=$GOOS" -e "GOARCH=$GOARCH" \
-    golang:1.25 -c "
-      git config --global --add safe.directory \"$APPDIR\" && 
-      go build -v -o \"$PKGDIR/$GOOS/summon-s3\""
-done
-
-  echo "Building linux-alpine binary"
-  echo "-----"
-
-  docker run --rm \
-      --entrypoint=/bin/sh \
-      -v "$PWD:$APPDIR" -w "$APPDIR" \
-      -e "GOOS=linux" -e "GOARCH=$GOARCH" \
-      golang:1.25-alpine -c "
-        apk add --no-cache git &&
-        git config --global --add safe.directory \"$APPDIR\" && 
-        go build -v -o \"$PKGDIR/linux-alpine/summon-s3\""
+echo "Releases built. Archives can be found in dist/goreleaser"

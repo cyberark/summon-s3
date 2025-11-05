@@ -1,4 +1,4 @@
-pkg
+dist/
 junit.xml
 summon-aws
 *.sublime-project

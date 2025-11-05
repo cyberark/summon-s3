@@ -45,7 +45,7 @@ function test_output {
         -e AWS_REGION -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_BUCKET -e AWS_ARTIFACT \
         test-summon -c "
           ./$SUMMON_DIR/install.sh > /dev/null && \
-          summon --provider ./pkg/linux/summon-s3 \
+          summon --provider ./dist/goreleaser/summon-s3_linux_amd64_v1/summon-s3 \
           --yaml \"TEST_CRED: !var $AWS_BUCKET/$AWS_ARTIFACT\" \
           printenv TEST_CRED") || true
 

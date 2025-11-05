@@ -15,8 +15,8 @@ builds:
       - amd64
     ldflags:
       - -s -w
-      - -X "main.Tag={{ .ShortCommit }}"
-      - -X "main.Version={{ .Env.VERSION }}"
+      - -X "github.com/cyberark/summon-s3/internal.Tag={{ .ShortCommit }}"
+      - -X "github.com/cyberark/summon-s3/internal.Version={{ .Env.VERSION }}"
     main: ./main.go
     hooks:
       post:
@@ -36,8 +36,8 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X "main.Tag={{ .ShortCommit }}"
-      - -X "main.Version={{ .Env.VERSION }}"
+      - -X "github.com/cyberark/summon-s3/internal.Tag={{ .ShortCommit }}"
+      - -X "github.com/cyberark/summon-s3/internal.Version={{ .Env.VERSION }}"
     main: ./main.go
     hooks:
       post:
@@ -49,7 +49,7 @@ archives:
     name_template: "{{.ProjectName}}-{{.Os}}-{{.Arch}}"
     format_overrides:
       - goos: windows
-        format: zip
+        formats: zip
     files:
       - CHANGELOG.md
       - README.md
