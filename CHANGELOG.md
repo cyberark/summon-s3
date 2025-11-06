@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.2.1] - 2025-10-27
+## [0.2.1] - 2025-11-04
+
+### Added
+- Added automated release and promotion via Jenkins
 
 ### Security
 - Update SECURITY.md (CNJR-10980)

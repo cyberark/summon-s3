@@ -9,12 +9,19 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/cyberark/summon-s3/internal"
 )
 
 func main() {
 	if len(os.Args) != 2 {
 		printAndExit("You must pass in one argument")
 	}
+
+	if os.Args[1] == "--version" || os.Args[1] == "-v" {
+		fmt.Printf("summon-s3 version %s\n", internal.FullVersionName)
+		os.Exit(0)
+	}
+
 	variableName := os.Args[1]
 	bucketName := strings.Split(variableName, "/")[0]
 	keyName := strings.Join(strings.Split(variableName, "/")[1:], "/")

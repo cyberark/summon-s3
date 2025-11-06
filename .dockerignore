@@ -1,5 +1,5 @@
 .git
 .godeps
-pkg/*
+dist/
 summon-conjur
 junit.xml

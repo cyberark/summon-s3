@@ -1,35 +1,44 @@
-#!/bin/bash
+#!/bin/bash -e
+
+function repo_root() {
+  git rev-parse --show-toplevel
+}
+
+function project_version() {
+  # VERSION derived from CHANGELOG and automated release library
+  echo "$(<"$(repo_root)/VERSION")"
+}
+
+function project_semantic_version() {
+  local version
+  version="$(project_version)"
+
+  # Remove Jenkins build number from VERSION
+  echo "${version/-*/}"
+}
+
+CURRENT_DIR=$(pwd)
+
+echo "Current dir: $CURRENT_DIR"
 
 APPDIR='/go/src/summon-s3'
-PKGDIR='pkg'
-OSES=(
-  'darwin'
-  'linux'
-  'windows'
-)
-GOARCH='amd64'
+MOUNT_DIR="/summon-s3"
+GORELEASER_IMAGE="goreleaser/goreleaser:latest"
 
-for GOOS in "${OSES[@]}"; do
-  echo "Building $GOOS-$GOARCH binary"
-  echo "-----"
+VERSION="$(project_semantic_version)"
 
-  docker run --rm \
-    --entrypoint=/bin/sh \
-    -v "$PWD:$APPDIR" -w "$APPDIR" \
-    -e "GOOS=$GOOS" -e "GOARCH=$GOARCH" \
-    golang:1.25 -c "
-      git config --global --add safe.directory \"$APPDIR\" && 
-      go build -v -o \"$PKGDIR/$GOOS/summon-s3\""
-done
+# Use GoReleaser for building
+docker pull "${GORELEASER_IMAGE}"
+docker run --rm -t \
+  --env GITHUB_TOKEN \
+  --env GOTOOLCHAIN=auto \
+  --env VERSION="${VERSION}" \
+  --entrypoint "/sbin/tini" \
+  -v "$CURRENT_DIR:$MOUNT_DIR" \
+  -w "$MOUNT_DIR" \
+  "${GORELEASER_IMAGE}" \
+  -- sh -c "git config --global --add safe.directory /summon-s3 && \
+    /entrypoint.sh --clean --snapshot && \
+    rm ./dist/goreleaser/artifacts.json"
 
-  echo "Building linux-alpine binary"
-  echo "-----"
-
-  docker run --rm \
-      --entrypoint=/bin/sh \
-      -v "$PWD:$APPDIR" -w "$APPDIR" \
-      -e "GOOS=linux" -e "GOARCH=$GOARCH" \
-      golang:1.25-alpine -c "
-        apk add --no-cache git &&
-        git config --global --add safe.directory \"$APPDIR\" && 
-        go build -v -o \"$PKGDIR/linux-alpine/summon-s3\""
+echo "Releases built. Archives can be found in dist/goreleaser"

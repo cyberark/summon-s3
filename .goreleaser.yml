@@ -1,0 +1,98 @@
+version: 2
+
+project_name: summon-s3
+
+builds:
+  - id: summon-s3
+    binary: summon-s3
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin  # MacOS
+      - linux
+      - windows
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w
+      - -X "github.com/cyberark/summon-s3/internal.Tag={{ .ShortCommit }}"
+      - -X "github.com/cyberark/summon-s3/internal.Version={{ .Env.VERSION }}"
+    main: ./main.go
+    hooks:
+      post:
+        # Copy the binary out into the <dist> path, and give the copy the name we want
+        # in the release <extra_files>.
+        - mkdir -p "{{ dir .Path }}/../binaries"
+        - cp "{{ .Path }}" "{{ dir .Path }}/../binaries/summon-s3_{{ .Target }}{{ .Ext }}"
+
+  # Apple silicon support
+  - id: summon-s3-arm
+    binary: summon-s3
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin  # MacOS
+    goarch:
+      - arm64
+    ldflags:
+      - -s -w
+      - -X "github.com/cyberark/summon-s3/internal.Tag={{ .ShortCommit }}"
+      - -X "github.com/cyberark/summon-s3/internal.Version={{ .Env.VERSION }}"
+    main: ./main.go
+    hooks:
+      post:
+        - mkdir -p "{{ dir .Path }}/../binaries"
+        - cp "{{ .Path }}" "{{ dir .Path }}/../binaries/summon-s3_{{ .Target }}{{ .Ext }}"
+
+archives:
+  - id: summon-s3-release-archive
+    name_template: "{{.ProjectName}}-{{.Os}}-{{.Arch}}"
+    format_overrides:
+      - goos: windows
+        formats: zip
+    files:
+      - CHANGELOG.md
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: 'SHA256SUMS.txt'
+
+brews:
+  - description: S3 provider for Summon
+    homepage: https://github.com/cyberark/summon-s3
+    url_template: https://github.com/cyberark/summon-s3/releases/download/v{{.Version}}/summon-s3-{{.Os}}-{{.Arch}}.tar.gz
+    install: |
+      target = lib/"summon"
+      target.install "summon-s3"
+    test: |
+      system lib/"summon"/"summon-s3", "--version"
+
+    repository:
+      owner: cyberark
+      name: homebrew-tools
+    skip_upload: true
+
+nfpms:
+  - file_name_template: "{{ .ProjectName }}"
+    vendor: CyberArk
+    homepage: https://github.com/cyberark/summon-s3
+    maintainer: Conjur Maintainers <conj_maintainers@cyberark.com>
+
+    description: S3 provider for Summon
+    recommends:
+      - summon
+    license: MIT
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/local/lib/summon  # where the binary is placed, default summon provider dir
+
+dist: ./dist/goreleaser
+
+release:
+  disable: true
+  draft: true
+  extra_files:
+    - glob: LICENSE
+    - glob: CHANGELOG.md
